@@ -56,4 +56,52 @@ class NewsItem {
       isBookmarked: isBookmarked ?? this.isBookmarked,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'imageUrl': imageUrl,
+      'videoUrl': videoUrl,
+      'pubDate': pubDate?.toIso8601String(),
+      'source': source,
+      'link': link,
+      'category': category.name,
+      'language': language.name,
+      'isBookmarked': isBookmarked,
+    };
+  }
+
+  factory NewsItem.fromJson(Map<String, dynamic> json) {
+    NewsCategory cat = NewsCategory.topStories;
+    for (final c in NewsCategory.values) {
+      if (c.name == json['category']) {
+        cat = c;
+        break;
+      }
+    }
+
+    NewsLanguage lang = NewsLanguage.english;
+    for (final l in NewsLanguage.values) {
+      if (l.name == json['language']) {
+        lang = l;
+        break;
+      }
+    }
+
+    return NewsItem(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      imageUrl: json['imageUrl'],
+      videoUrl: json['videoUrl'],
+      pubDate: json['pubDate'] != null ? DateTime.tryParse(json['pubDate']) : null,
+      source: json['source'] ?? '',
+      link: json['link'] ?? '',
+      category: cat,
+      language: lang,
+      isBookmarked: json['isBookmarked'] ?? true,
+    );
+  }
 }

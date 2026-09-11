@@ -489,4 +489,5 @@ extension SuperEdgeInsets on EdgeInsets {
   EdgeInsets get v4h8 => symmetric(v: 4, h: 8);
   EdgeInsets get v12h8 => symmetric(v: 12, h: 8);
   EdgeInsets get v10h10 => symmetric(v: 10, h: 10);
+  EdgeInsets get v10h14 => symmetric(v: 10, h: 14);
 }

@@ -81,4 +81,6 @@ class AppStrings {
   static const String hoursAgo = 'hours ago';
   static const String dayAgo = 'day ago';
   static const String daysAgo = 'days ago';
+  static const String searchSavedBookmarks = 'Search saved bookmarks...';
+  static const String noMatchingBookmarksFound = 'No matching bookmarks found';
 }

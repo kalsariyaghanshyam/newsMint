@@ -30,7 +30,7 @@ class ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : AppColors.textPrimaryLight;
+    final textColor = isDark ? AppColors.white : AppColors.textPrimaryLight;
     final subTextColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return Scaffold(
@@ -41,10 +41,10 @@ class ErrorView extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+               const Icon(
                 Icons.rss_feed,
                 size: 64,
-                color: Colors.redAccent,
+                color: AppColors.brandRed,
               ),
               16.height,
               Text(
@@ -64,7 +64,7 @@ class ErrorView extends StatelessWidget {
                 label: Text(AppStrings.tryAgain, style: poppins.get14.semiBold.white),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.white,
                   padding: edge.v12h8.copyWith(left: 24, right: 24),
                   shape: RoundedRectangleBorder(
                     borderRadius: radius.all20,
@@ -88,7 +88,7 @@ class EmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : AppColors.textPrimaryLight;
+    final textColor = isDark ? AppColors.white : AppColors.textPrimaryLight;
     final subTextColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return Scaffold(
@@ -122,7 +122,7 @@ class EmptyView extends StatelessWidget {
                 label: Text(AppStrings.refreshFeed, style: poppins.get14.semiBold.white),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.white,
                   padding: edge.v12h8.copyWith(left: 24, right: 24),
                   shape: RoundedRectangleBorder(
                     borderRadius: radius.all20,

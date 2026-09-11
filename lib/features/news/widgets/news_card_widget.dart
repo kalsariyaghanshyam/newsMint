@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart' as vector;
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
@@ -99,9 +102,9 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
   ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bgColor = isDark ? AppColors.backgroundDark : Colors.white;
-    final cardPillBg = isDark ? AppColors.surfaceDark : Colors.white;
-    final textColor = isDark ? Colors.white : AppColors.textPrimaryLight;
+    final bgColor = isDark ? AppColors.backgroundDark : AppColors.white;
+    final cardPillBg = isDark ? AppColors.surfaceDark : AppColors.white;
+    final textColor = isDark ? AppColors.white : AppColors.textPrimaryLight;
     final bodyTextColor = isDark ? AppColors.textBodyDark : AppColors.textBodyLight;
     final metaTextColor = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
     final bottomBannerBg = isDark ? AppColors.surfaceDark : AppColors.bannerBackgroundLight;
@@ -149,7 +152,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                           borderRadius: radius.all20,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
+                              color: AppColors.black.withValues(alpha: 0.15),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
@@ -164,7 +167,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                                 color: AppColors.brandRed,
                                 borderRadius: radius.all4,
                               ),
-                              child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 10),
+                              child: const Icon(Icons.grid_view_rounded, color: AppColors.white, size: 10),
                             ),
                             6.width,
                             Flexible(
@@ -185,69 +188,73 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Save / Bookmark Button
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () {
-                              controller.toggleBookmark(widget.newsItem);
-                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    widget.newsItem.isBookmarked
-                                        ? AppStrings.bookmarkAdded
-                                        : AppStrings.bookmarkRemoved,
+                        // Save / Bookmark Button (Reactive Consumer for immediate state update)
+                        Consumer<NewsController>(
+                          builder: (context, newsController, child) {
+                            final isSaved = newsController.isBookmarked(widget.newsItem);
+                            return GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                newsController.toggleBookmark(widget.newsItem);
+                                setState(() {});
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      !isSaved
+                                          ? AppStrings.bookmarkAdded
+                                          : AppStrings.bookmarkRemoved,
+                                    ),
+                                    duration: const Duration(seconds: 1),
+                                    behavior: SnackBarBehavior.floating,
                                   ),
-                                  duration: const Duration(seconds: 1),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            },
-                            borderRadius: radius.all20,
-                            child: Container(
-                              padding: edge.all8,
-                              decoration: BoxDecoration(
-                                color: cardPillBg,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.15),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                widget.newsItem.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                                color: widget.newsItem.isBookmarked
-                                    ? AppColors.brandRed
-                                    : (isDark ? Colors.white : Colors.black87),
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ),
-                        8.width,
-
-                        // Share Button
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () async {
-                              try {
-                                final box = context.findRenderObject() as RenderBox?;
-                                final origin = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
-                                await Share.share(
-                                  '${widget.newsItem.title}\n\n${widget.newsItem.link}',
-                                  subject: widget.newsItem.title,
-                                  sharePositionOrigin: origin,
                                 );
-                              } catch (e) {
-                                debugPrint('Share error: $e');
-                              }
-                            },
-                            borderRadius: radius.all20,
+                              },
+                              child: Container(
+                                padding: edge.all6, // Extra outer gesture padding
+                                child: Container(
+                                  padding: edge.all8,
+                                  decoration: BoxDecoration(
+                                    color: cardPillBg,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.black.withValues(alpha: 0.15),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    isSaved ? Icons.bookmark : Icons.bookmark_border,
+                                    color: isSaved
+                                        ? AppColors.brandRed
+                                        : (isDark ? AppColors.white : Colors.black87),
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        4.width,
+
+                        // Share Button (Expanded 48x48 Touch Target Area)
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () async {
+                            try {
+                              final textToShare = '${widget.newsItem.title}\n\n${widget.newsItem.link}';
+                              await Share.share(
+                                textToShare,
+                                subject: widget.newsItem.title,
+                              );
+                            } catch (e) {
+                              debugPrint('Share error: $e');
+                            }
+                          },
+                          child: Container(
+                            padding: edge.all6, // Extra outer gesture padding
                             child: Container(
                               padding: edge.all8,
                               decoration: BoxDecoration(
@@ -255,7 +262,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.15),
+                                    color: AppColors.black.withValues(alpha: 0.15),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
@@ -263,7 +270,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                               ),
                               child: Icon(
                                 Icons.share_outlined,
-                                color: isDark ? Colors.white : Colors.black87,
+                                color: isDark ? AppColors.white : Colors.black87,
                                 size: 20,
                               ),
                             ),
@@ -379,7 +386,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
     return Container(
       width: size.width,
       height: size.height,
-      color: Colors.black,
+      color: AppColors.black,
       child: Stack(
         children: [
           // Background Real Video Player OR Smooth Thumbnail Image
@@ -410,9 +417,9 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.3),
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.85),
+                    AppColors.black.withValues(alpha: 0.3),
+                    AppColors.trans,
+                    AppColors.black.withValues(alpha: 0.85),
                   ],
                 ),
               ),
@@ -442,13 +449,13 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                 width: 68,
                 height: 68,
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: AppColors.black.withValues(alpha: 0.6),
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(color: AppColors.white, width: 2),
                 ),
                 child: Icon(
                   _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  color: Colors.white,
+                  color: AppColors.white,
                   size: 44,
                 ),
               ),
@@ -461,25 +468,31 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
             bottom: 70,
             child: Column(
               children: [
-                IconButton(
-                  icon: Icon(
-                    widget.newsItem.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                    color: widget.newsItem.isBookmarked ? AppColors.brandRed : AppColors.white,
-                    size: 28,
-                  ),
-                  onPressed: () {
-                    controller.toggleBookmark(widget.newsItem);
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          widget.newsItem.isBookmarked
-                              ? AppStrings.bookmarkAdded
-                              : AppStrings.bookmarkRemoved,
-                        ),
-                        duration: const Duration(seconds: 1),
-                        behavior: SnackBarBehavior.floating,
+                Consumer<NewsController>(
+                  builder: (context, newsController, child) {
+                    final isSaved = newsController.isBookmarked(widget.newsItem);
+                    return IconButton(
+                      icon: Icon(
+                        isSaved ? Icons.bookmark : Icons.bookmark_border,
+                        color: isSaved ? AppColors.brandRed : AppColors.white,
+                        size: 28,
                       ),
+                      onPressed: () {
+                        newsController.toggleBookmark(widget.newsItem);
+                        setState(() {});
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              !isSaved
+                                  ? AppStrings.bookmarkAdded
+                                  : AppStrings.bookmarkRemoved,
+                            ),
+                            duration: const Duration(seconds: 1),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -560,7 +573,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                           overlayShape: RoundSliderOverlayShape(overlayRadius: 10),
                           activeTrackColor: AppColors.cyanAccent,
                           inactiveTrackColor: Colors.white30,
-                          thumbColor: Colors.white,
+                          thumbColor: AppColors.white,
                         ),
                         child: Slider(
                           value: progress,
@@ -580,7 +593,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
                       overlayShape: RoundSliderOverlayShape(overlayRadius: 10),
                       activeTrackColor: AppColors.cyanAccent,
                       inactiveTrackColor: Colors.white30,
-                      thumbColor: Colors.white,
+                      thumbColor: AppColors.white,
                     ),
                     child: Slider(
                       value: 0.35,
@@ -595,66 +608,110 @@ class _NewsCardWidgetState extends State<NewsCardWidget> {
     );
   }
 
-  void _openFullScreenImageModal(BuildContext context, String? imageUrl) {
+  void _openFullScreenImageModal(
+      BuildContext context,
+      String? imageUrl,
+      ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       enableDrag: true,
       isDismissible: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.trans,
+      barrierColor: AppColors.trans,
       builder: (context) {
+        final TransformationController transformationController = TransformationController();
+        TapDownDetails? doubleTapDetails;
+
         return Dismissible(
           key: const Key('full_screen_image_dismiss'),
           direction: DismissDirection.down,
           onDismissed: (_) => Navigator.of(context).pop(),
-          child: Container(
-            color: Colors.black,
-            child: SafeArea(
-              top: true,
-              bottom: true,
-              child: Stack(
-                children: [
-                  // Full Screen Zoomable Image Viewer
-                  Center(
-                    child: InteractiveViewer(
-                      minScale: 0.5,
-                      maxScale: 4.0,
-                      child: AppImage(
-                        imagePath: imageUrl,
-                        fit: BoxFit.contain,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
+          child: SafeArea(
+            top: true,
+            bottom: true,
+            child: Stack(
+              children: [
+                // Blur the screen behind the modal
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: 15,
+                      sigmaY: 15,
+                    ),
+                    child: Container(
+                      color: Colors.black.withValues(alpha: 0.25),
                     ),
                   ),
+                ),
 
-                  // Top-Right Smaller Close (X) Button
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        padding: edge.all6,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white38, width: 1),
-                        ),
-                        child: const Icon(
-                          Icons.close_rounded,
-                          color: Colors.white,
-                          size: 18,
+                // Full Screen Image
+                Positioned.fill(
+                  child: GestureDetector(
+                    onDoubleTapDown: (details) {
+                      doubleTapDetails = details;
+                    },
+                    onDoubleTap: () {
+                      if (transformationController.value.isIdentity()) {
+                        final position = doubleTapDetails?.localPosition ?? Offset.zero;
+                        transformationController.value = Matrix4.identity()
+                          ..translateByVector3(vector.Vector3(-position.dx * 1.5, -position.dy * 1.5, 0.0))
+                          ..scaleByVector3(vector.Vector3(2.5, 2.5, 1.0));
+                      } else {
+                        transformationController.value = Matrix4.identity();
+                      }
+                    },
+                    child: Center(
+                      child: InteractiveViewer(
+                        transformationController: transformationController,
+                        clipBehavior: Clip.none,
+                        panEnabled: true,
+                        scaleEnabled: true,
+                        minScale: 1.0,
+                        maxScale: 5.0,
+                        child: AppImage(
+                          imagePath: imageUrl,
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                          height: double.infinity,
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+
+                // Close Button
+                Positioned(
+                  top: 36,
+                  right: 12,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: edge.all6,
+                      decoration: BoxDecoration(
+                        color: AppColors.black.withValues(alpha: 0.45),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white38,
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: AppColors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         );
       },
     );
   }
+
+
+
 }

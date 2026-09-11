@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import '../constants/app_images.dart';
 import '../constants/app_strings.dart';
 import '../extensions/border_radius_extension.dart';
@@ -98,16 +99,16 @@ class AppImage extends StatelessWidget {
 
   Widget _buildLoadingPlaceholder(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: width,
-      height: height,
-      color: isDark ? AppColors.surfaceDark : AppColors.borderLight,
-      child: const Center(
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
+    final baseColor = isDark ? AppColors.surfaceDark : AppColors.borderLight;
+    final highlightColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Container(
+        width: width ?? double.infinity,
+        height: height ?? double.infinity,
+        color: baseColor,
       ),
     );
   }
@@ -134,7 +135,7 @@ class AppImage extends StatelessWidget {
 
   Widget _buildFallbackLogoBadge(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : AppColors.textPrimaryLight;
+    final textColor = isDark ? AppColors.white : AppColors.textPrimaryLight;
 
     return Center(
       child: Column(
@@ -149,7 +150,7 @@ class AppImage extends StatelessWidget {
             ),
             child: const Icon(
               Icons.newspaper_rounded,
-              color: Colors.white,
+              color: AppColors.white,
               size: 24,
             ),
           ),

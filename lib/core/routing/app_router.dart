@@ -4,6 +4,7 @@ import '../../features/feed/view/feed_view.dart';
 import '../../features/news/models/news_item.dart';
 import '../../features/news/widgets/news_card_widget.dart';
 import '../animation/app_animations.dart';
+import '../theme/app_colors.dart';
 import 'route_names.dart';
 
 class AppRouter {
@@ -22,10 +23,10 @@ class AppRouter {
         if (newsItem != null) {
           return SlidePageRoute(
             page: Scaffold(
-              backgroundColor: Colors.black,
+              backgroundColor: AppColors.black,
               appBar: AppBar(
-                backgroundColor: Colors.black,
-                iconTheme: const IconThemeData(color: Colors.white),
+                backgroundColor: AppColors.black,
+                iconTheme: const IconThemeData(color: AppColors.white),
               ),
               body: NewsCardWidget(
                 newsItem: newsItem,

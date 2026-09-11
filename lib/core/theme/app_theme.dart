@@ -15,7 +15,7 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryDark,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: AppColors.white),
       ),
       colorScheme: const ColorScheme.dark(
         primary: AppColors.accentSkyDark,

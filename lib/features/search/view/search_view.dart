@@ -7,6 +7,7 @@ import '../../../core/extensions/spacing_extension.dart';
 import '../../../core/extensions/typography_extension.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_image.dart';
+import '../../../core/widgets/app_search_bar.dart';
 import '../../news/controllers/news_controller.dart';
 import '../../news/models/news_enums.dart';
 import '../../news/models/news_item.dart';
@@ -46,13 +47,19 @@ class _SearchViewState extends State<SearchView> {
     final searchBgColor = isDark ? AppColors.surfaceDark : AppColors.backgroundLight;
     final primaryAccent = theme.colorScheme.primary;
 
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: SafeArea(
-        child: Consumer<NewsController>(
-          builder: (context, controller, _) {
-            return _buildContent(context, controller, isDark, textColor, subTextColor, searchBgColor, primaryAccent);
-          },
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: bgColor,
+        body: SafeArea(
+          child: Consumer<NewsController>(
+            builder: (context, controller, _) {
+              return _buildContent(context, controller, isDark, textColor, subTextColor, searchBgColor, primaryAccent);
+            },
+          ),
         ),
       ),
     );
@@ -83,42 +90,20 @@ class _SearchViewState extends State<SearchView> {
         // 1. Top Search Header Field
         Padding(
           padding: edge.all16,
-          child: Container(
-            decoration: BoxDecoration(
-              color: searchBgColor,
-              borderRadius: radius.all12,
-              border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-              ),
-            ),
-            child: TextField(
-              controller: _searchController,
-              style: poppins.get14.medium.textColor(textColor),
-              cursorColor: primaryAccent,
-              onChanged: (val) {
-                setState(() {
-                  _searchQuery = val.trim();
-                });
-              },
-              decoration: InputDecoration(
-                hintText: AppStrings.searchForNews,
-                hintStyle: poppins.get14.regular.textColor(subTextColor),
-                prefixIcon: Icon(Icons.search_rounded, color: primaryAccent, size: 22),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(Icons.clear_rounded, color: subTextColor),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = '';
-                          });
-                        },
-                      )
-                    : null,
-                border: InputBorder.none,
-                contentPadding: edge.v12h16,
-              ),
-            ),
+          child: AppSearchBar(
+            controller: _searchController,
+            searchQuery: _searchQuery,
+            hintText: AppStrings.searchForNews,
+            onChanged: (val) {
+              setState(() {
+                _searchQuery = val.trim();
+              });
+            },
+            onClear: () {
+              setState(() {
+                _searchQuery = '';
+              });
+            },
           ),
         ),
 
@@ -326,31 +311,35 @@ class _SearchViewState extends State<SearchView> {
     required VoidCallback onTap,
   }) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              borderRadius: radius.all16,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Column(
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                borderRadius: radius.all16,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.black.withValues(alpha: 0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: iconColor, size: 26),
             ),
-            child: Icon(icon, color: iconColor, size: 26),
-          ),
-          8.height,
-          Text(
-            label,
-            style: poppins.get12.semiBold.textColor(textColor),
-          ),
-        ],
+            8.height,
+            Text(
+              label,
+              style: poppins.get12.semiBold.textColor(textColor),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -385,10 +374,14 @@ class _SearchViewState extends State<SearchView> {
           ],
         ),
         GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: onViewAll,
-          child: Text(
-            AppStrings.viewAll,
-            style: poppins.get12.bold.textColor(primaryAccent),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0), // Enlarge hit target area for View All tap
+            child: Text(
+              AppStrings.viewAll,
+              style: poppins.get12.bold.textColor(primaryAccent),
+            ),
           ),
         ),
       ],
@@ -404,7 +397,7 @@ class _SearchViewState extends State<SearchView> {
     Color textColor,
     Color? subTextColor,
   ) {
-    final cardBg = isDark ? AppColors.surfaceDark : Colors.white;
+    final cardBg = isDark ? AppColors.surfaceDark : AppColors.white;
     final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
 
     return InkWell(
@@ -421,7 +414,7 @@ class _SearchViewState extends State<SearchView> {
               ? []
               : [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
+                    color: AppColors.black.withValues(alpha: 0.03),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),

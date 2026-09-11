@@ -3,6 +3,8 @@ library stacked_page_view;
 import 'dart:math';
 import 'package:flutter/material.dart';
 
+import '../core/theme/app_colors.dart';
+
 /// A Calculator.
 class StackPageView extends StatefulWidget {
   const StackPageView({
@@ -11,7 +13,7 @@ class StackPageView extends StatefulWidget {
     required this.controller,
     required this.child,
     this.animationAxis = Axis.vertical,
-    this.backgroundColor = Colors.black,
+    this.backgroundColor = AppColors.black,
   }) : super(key: key);
   final int index;
   final PageController controller;
@@ -29,25 +31,36 @@ class StackPageViewState extends State<StackPageView> {
   @override
   void initState() {
     super.initState();
-    if (widget.controller.position.haveDimensions) {
-      widget.controller.addListener(() {
-        _listener();
-      });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _updatePosition();
+        widget.controller.addListener(_listener);
+      }
+    });
+  }
+
+  void _listener() {
+    if (mounted && widget.controller.hasClients) {
+      _updatePosition();
     }
   }
 
-  _listener() {
-    if (mounted) {
-      setState(() {
-        pagePosition =
-        num.parse(widget.controller.page!.toStringAsFixed(4)) as double;
-        currentPosition = widget.controller.page!.floor();
-      });
+  void _updatePosition() {
+    if (widget.controller.hasClients && widget.controller.page != null) {
+      final double p = widget.controller.page!;
+      final int c = p.floor();
+      if (p != pagePosition || c != currentPosition) {
+        setState(() {
+          pagePosition = p;
+          currentPosition = c;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_listener);
     super.dispose();
   }
 

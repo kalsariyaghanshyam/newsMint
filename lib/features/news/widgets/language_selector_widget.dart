@@ -17,7 +17,7 @@ class LanguageSelectorWidget extends StatelessWidget {
         return Container(
           padding: edge.v4h8,
           decoration: BoxDecoration(
-            color: Colors.white12,
+            color: AppColors.backgroundLight,
             borderRadius: radius.all16,
           ),
           child: DropdownButtonHideUnderline(

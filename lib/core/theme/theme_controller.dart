@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../services/preferences_service.dart';
 
 class ThemeController extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.dark;
+  ThemeMode _themeMode = PreferencesService.getSavedThemeMode();
 
   ThemeMode get themeMode => _themeMode;
 
@@ -13,12 +14,14 @@ class ThemeController extends ChangeNotifier {
     } else {
       _themeMode = ThemeMode.dark;
     }
+    PreferencesService.saveThemeMode(_themeMode);
     notifyListeners();
   }
 
   void setThemeMode(ThemeMode mode) {
     if (_themeMode != mode) {
       _themeMode = mode;
+      PreferencesService.saveThemeMode(_themeMode);
       notifyListeners();
     }
   }

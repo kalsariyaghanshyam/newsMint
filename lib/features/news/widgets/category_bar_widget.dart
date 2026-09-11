@@ -35,13 +35,14 @@ class CategoryBarWidget extends StatelessWidget {
                   final label = category.getLabel(controller.selectedLanguage);
 
                   return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () {
                       controller.selectCategory(category);
                     },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
                       margin: edge.h4,
-                      padding: edge.v6h16,
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                       child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,

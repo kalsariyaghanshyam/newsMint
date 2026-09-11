@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../reusable/stack_page_view.dart';
 import '../models/news_item.dart';
@@ -40,51 +41,64 @@ class _FullFeedViewState extends State<FullFeedView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : Colors.black,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Swipeable Feed Items
-            PageView.builder(
-              scrollDirection: Axis.vertical,
-              controller: _pageController,
-              itemCount: widget.items.length,
-              itemBuilder: (context, index) {
-                final item = widget.items[index];
-                return StackPageView(
-                  controller: _pageController,
-                  index: index,
-                  child: NewsCardWidget(
-                    newsItem: item,
-                    currentIndex: index,
-                    totalCount: widget.items.length,
-                  ),
-                );
-              },
-            ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.trans,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.black,
+        body: SafeArea(
+          // top: false,
+          child: Stack(
+            children: [
+              // Swipeable Feed Items
+              PageView.builder(
+                scrollDirection: Axis.vertical,
+                controller: _pageController,
+                itemCount: widget.items.length,
+                itemBuilder: (context, index) {
+                  final item = widget.items[index];
+                  return StackPageView(
+                    controller: _pageController,
+                    index: index,
+                    child: NewsCardWidget(
+                      newsItem: item,
+                      currentIndex: index,
+                      totalCount: widget.items.length,
+                    ),
+                  );
+                },
+              ),
 
-            // Top Floating Back Header Button
-            Positioned(
-              top: 12,
-              left: 12,
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: Colors.white,
-                    size: 22,
+              // Top Floating Back Header Button with generous touch target area
+              Positioned(
+                top: 0,
+                left: 0,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    padding: const EdgeInsets.all(12), // Touch gesture hit area expanded
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.black.withValues(alpha: 0.6),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white24, width: 1),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_rounded,
+                        color: AppColors.white,
+                        size: 22,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
